@@ -24,6 +24,76 @@ Autonomous B2B lead generation and personalized cold outreach system built for m
 
 ---
 
+## 🤖 How the AI Lead Generation Works
+
+The AI layer is implemented in `server/services/openRouterService.js` and uses the
+OpenRouter chat-completions API. The selected model is controlled by the `MODEL`
+environment variable and defaults to `openai/gpt-4o-mini`.
+
+### 1. Campaign parameters are sent to the model
+
+When a campaign is submitted, the backend sends the following information in a
+structured prompt:
+
+- SaaS product description or value proposition
+- Target country or geography
+- Target industry
+- Requested number of leads
+
+The requested count is protected by a server-side limit of 1–20 leads.
+
+### 2. The model researches and structures prospects
+
+The prompt instructs the model to identify organizations that match the selected
+country and industry and that could benefit from the product. For every prospect,
+the model is asked to return:
+
+- Organization name
+- Official website
+- Country and industry
+- Public contact or inquiry email
+- Short organization description
+- Source URL
+
+The model is also instructed to create a personalized cold-email subject, email
+body, and call to action for each organization. The email prompt asks it to
+include a relevant hook, explain the product's value, describe expected business
+relevance or ROI, and finish with a low-friction CTA.
+
+### 3. The response is required to be JSON
+
+The backend requests a JSON response so it can process the result automatically.
+It also includes defensive parsing for common model formatting variations, such as
+Markdown code fences or wrapper properties such as `leads` and `results`.
+
+Each returned record is normalized before storage. Missing fields receive safe
+defaults, and every lead is assigned the initial status `Not Contacted` together
+with the campaign parameters that produced it.
+
+### 4. Leads are saved and displayed
+
+After normalization, the backend saves the records to MongoDB when available. If
+MongoDB is not running, the embedded JSON document store is used instead. The
+frontend then displays the generated leads so they can be reviewed, edited,
+filtered, exported, or marked as contacted.
+
+### AI limitations and responsible use
+
+The model generates prospect information from its learned knowledge and the
+instructions in the prompt; the application does not currently connect to a
+dedicated live search, business-directory, LinkedIn, or email-verification API.
+Therefore, websites, organizations, and contact emails must be checked by a
+person before outreach. A generated or fallback email address is not proof that
+the mailbox exists.
+
+The current outreach endpoint records an email as dispatched and updates the lead
+status, but it does not deliver a real email through SMTP, Gmail, SendGrid, or
+another provider. A production deployment should add a verified data source,
+email verification, consent/compliance checks, rate limiting, and a real email
+delivery provider.
+
+---
+
 ## 📦 Getting Started
 
 ### Prerequisites
