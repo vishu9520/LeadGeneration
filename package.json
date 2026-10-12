@@ -1,0 +1,15 @@
+{
+  "name": "outbound-lead-generator",
+  "version": "1.0.0",
+  "description": "MERN Stack Outbound Lead Generator for SaaS Startups",
+  "main": "server/server.js",
+  "scripts": {
+    "server": "node server/server.js",
+    "client": "npm run dev --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "npm run build --prefix client"
+  },
+  "dependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
